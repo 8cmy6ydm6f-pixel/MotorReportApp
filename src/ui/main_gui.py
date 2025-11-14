@@ -49,6 +49,7 @@ from .tabs.generate_tab import GenerateTab
 from .core.status_manager import StatusManager
 from .components.base import ProgressIndicators
 from .utils.thread_pool import run_in_background, shutdown_thread_pool
+from .theme import set_user_theme
 
 # Project specific imports
 from ..config.directory_config import PROJECT_ROOT
@@ -146,6 +147,20 @@ class MotorReportAppGUI:
 
     def _initialize_ui_components(self):
         """Initializes all UI components and controls."""
+        # Helper to resolve themed colors (falls back to plain strings)
+        def themed_color(token: str, fallback: str):
+            try:
+                if hasattr(self.page, 'theme') and getattr(self.page, 'theme', None) is not None:
+                    cs = getattr(self.page.theme, 'color_scheme', None)
+                    if cs and hasattr(cs, token):
+                        val = getattr(cs, token)
+                        if val:
+                            return val
+            except Exception:
+                pass
+            return fallback
+
+        self._themed_color = themed_color
         # Setup Tab Components
         self.tests_folder_path_text = ft.Text("No test folder selected.", italic=True, max_lines=2)
         self.registry_file_path_text = ft.Text("No registry file selected.", italic=True, max_lines=2)
@@ -224,15 +239,19 @@ class MotorReportAppGUI:
             padding=ft.padding.only(top=10, bottom=5)
         )
         self.search_manager.register_filter_inputs(self.results_filter_inputs)
+        # Theme-aware defaults for search placeholder
+        placeholder_text_color = self._themed_color('on_surface', 'grey')
+        placeholder_accent = self._themed_color('primary', ft.Colors.BLUE_700)
+
         self.results_area = ft.Column(
             controls=[
                 ft.Container(
                     content=ft.Column([
-                        ft.Icon(ft.Icons.SEARCH, size=48, color="grey"),
-                        ft.Text("Enter a search term to find tests", size=16, color="grey"),
-                        ft.Text("Valid examples:", size=14, weight=ft.FontWeight.W_500, color="blue"),
-                        ft.Text("• Test numbers: 1, 2, 3 or 1,2,3", size=12, color="grey"),
-                        ft.Text("• SAP codes: 6120890812, 6120890848", size=12, color="grey"),
+                        ft.Icon(ft.Icons.SEARCH, size=48, color=placeholder_text_color),
+                        ft.Text("Enter a search term to find tests", size=16, color=placeholder_text_color),
+                        ft.Text("Valid examples:", size=14, weight=ft.FontWeight.W_500, color=placeholder_accent),
+                        ft.Text("• Test numbers: 1, 2, 3 or 1,2,3", size=12, color=placeholder_text_color),
+                        ft.Text("• SAP codes: 6120890812, 6120890848", size=12, color=placeholder_text_color),
                     ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
                     padding=ft.padding.all(20),
                     alignment=ft.alignment.center
@@ -306,6 +325,26 @@ class MotorReportAppGUI:
         from .utils.helpers import SAPNavigationManager
         self.sap_navigator = SAPNavigationManager(self)
 
+        # Theme toggle in header (Dropdown persisted in client_storage)
+        try:
+            stored_theme = None
+            if hasattr(self.page, 'client_storage') and self.page.client_storage is not None:
+                try:
+                    stored_theme = self.page.client_storage.get('theme')
+                except Exception:
+                    stored_theme = None
+
+            theme_value = stored_theme or 'system'
+            self.theme_dropdown = ft.Dropdown(
+                label='Theme',
+                value=theme_value,
+                options=[ft.dropdown.Option(o) for o in ("system", "light", "dark")],
+                on_change=lambda e: self._on_theme_changed(e.control.value),
+                width=160,
+            )
+        except Exception:
+            self.theme_dropdown = ft.Container()
+
     def _setup_file_pickers(self):
         """Sets up the file and folder pickers."""
         self.folder_picker = ft.FilePicker(on_result=self.event_handlers.on_folder_picked)
@@ -342,10 +381,27 @@ class MotorReportAppGUI:
             expand=True,
         )
 
+        # Header row with app title and theme toggle
+        # Wrap theme control in a small padded container so its popup isn't clipped
+        theme_control = getattr(self, 'theme_dropdown', ft.Container())
+        theme_control_wrapper = ft.Container(
+            content=theme_control,
+            padding=ft.padding.symmetric(vertical=4, horizontal=6),
+            margin=ft.margin.only(top=6),
+            alignment=ft.alignment.center_right
+        )
+
+        header_row = ft.Row([
+            ft.Text(f"Motor Report Generator v{VERSION}", size=32, weight=ft.FontWeight.BOLD),
+            ft.Container(expand=True),
+            # place themed control in wrapper to avoid clipping at the top edge
+            theme_control_wrapper
+        ], vertical_alignment=ft.CrossAxisAlignment.CENTER)
+
         self.page.add(
             ft.Column(
                 [
-                    ft.Text(f"Motor Report Generator v{VERSION}", size=32, weight=ft.FontWeight.BOLD),
+                    header_row,
                     ft.Divider(),
                     self.tabs,
                     ft.Divider(),
@@ -519,6 +575,30 @@ class MotorReportAppGUI:
         self.status_manager.update_status(f"⚙️ Updated {config_key}: {'enabled' if value else 'disabled'}", "blue")
         self.event_handlers.on_configuration_changed(config_key, value)
         self._safe_page_update()
+
+    def _on_theme_changed(self, mode: str):
+        """Apply and persist the user theme selection."""
+        try:
+            if mode not in ("light", "dark", "system"):
+                return
+            # Persist via client storage and apply via theme helper
+            if hasattr(self.page, 'client_storage') and self.page.client_storage is not None:
+                try:
+                    self.page.client_storage.set('theme', mode)
+                except Exception:
+                    pass
+            try:
+                set_user_theme(self.page, mode)
+            except Exception:
+                pass
+            # Provide immediate feedback
+            try:
+                self.status_manager.update_status(f"Theme set to {mode}", "blue")
+                self._safe_page_update()
+            except Exception:
+                pass
+        except Exception as e:
+            logger.debug(f"Error changing theme: {e}")
 
     def _go_to_tab(self, tab_index: int):
         """Navigate to a specific tab index."""

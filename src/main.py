@@ -91,6 +91,13 @@ def main(page: ft.Page):
         page.title = "Motor Report Generator - Web App"
         page.padding = 10
         page.scroll = ft.ScrollMode.AUTO
+
+        # Apply UI theme (system/light/dark) in a safe way
+        try:
+            from src.ui.theme import apply_theme
+            apply_theme(page)
+        except Exception as e:
+            logger.debug("apply_theme not available or failed: %s", e)
         
         logger.info("Initializing MotorReportAppGUI for Flet page")
         # Initialize and run the GUI

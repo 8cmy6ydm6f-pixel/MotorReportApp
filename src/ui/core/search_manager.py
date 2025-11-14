@@ -97,9 +97,9 @@ class SearchManager:
         self.gui.results_area.controls.append(
             ft.Container(
                 content=ft.Column([
-                    ft.Icon(ft.Icons.SEARCH_OFF, size=48, color="grey"),
-                    ft.Text("No search results", size=16, weight=ft.FontWeight.W_500, color="grey"),
-                    ft.Text("Enter a SAP code or test number to search", size=12, color="grey")
+                    ft.Icon(ft.Icons.SEARCH_OFF, size=48, color=self.gui._themed_color('on_surface', 'grey')),
+                    ft.Text("No search results", size=16, weight=ft.FontWeight.W_500, color=self.gui._themed_color('on_surface', 'grey')),
+                    ft.Text("Enter a SAP code or test number to search", size=12, color=self.gui._themed_color('on_surface', 'grey'))
                 ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
                 padding=ft.padding.all(20),
                 alignment=ft.alignment.center
@@ -113,9 +113,9 @@ class SearchManager:
         self.gui.results_area.controls.append(
             ft.Container(
                 content=ft.Column([
-                    ft.Icon(ft.Icons.ERROR, size=48, color="red"),
-                    ft.Text("Error loading results", size=16, weight=ft.FontWeight.W_500, color="red"),
-                    ft.Text("Please try searching again", size=12, color="grey")
+                    ft.Icon(ft.Icons.ERROR, size=48, color=self.gui._themed_color('error', 'red')),
+                    ft.Text("Error loading results", size=16, weight=ft.FontWeight.W_500, color=self.gui._themed_color('error', 'red')),
+                    ft.Text("Please try searching again", size=12, color=self.gui._themed_color('on_surface', 'grey'))
                 ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
                 padding=ft.padding.all(20),
                 alignment=ft.alignment.center
@@ -467,9 +467,9 @@ class SearchResultsBuilder:
         gui.results_area.controls.append(
             ft.Container(
                 content=ft.Column([
-                    ft.Icon(ft.Icons.SEARCH_OFF, size=48, color="grey"),
-                    ft.Text("No search results", size=16, weight=ft.FontWeight.W_500, color="grey"),
-                    ft.Text("Enter a SAP code or test number to search", size=12, color="grey")
+                    ft.Icon(ft.Icons.SEARCH_OFF, size=48, color=gui._themed_color('on_surface', 'grey')),
+                    ft.Text("No search results", size=16, weight=ft.FontWeight.W_500, color=gui._themed_color('on_surface', 'grey')),
+                    ft.Text("Enter a SAP code or test number to search", size=12, color=gui._themed_color('on_surface', 'grey'))
                 ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
                 padding=ft.padding.all(20),
                 alignment=ft.alignment.center
@@ -487,14 +487,14 @@ class SearchResultsBuilder:
         gui.results_area.controls.append(
             ft.Container(
                 content=ft.Column([
-                    ft.Icon(ft.Icons.FILTER_ALT_OFF, size=48, color="grey"),
+                    ft.Icon(ft.Icons.FILTER_ALT_OFF, size=48, color=gui._themed_color('on_surface', 'grey')),
                     ft.Text(
                         f"No tests{sap_note} match the current filters",
                         size=16,
                         weight=ft.FontWeight.W_500,
-                        color="grey"
+                        color=gui._themed_color('on_surface', 'grey')
                     ),
-                    ft.Text(f"Clear filters to view all {total_tests} test(s).", size=12, color="grey")
+                    ft.Text(f"Clear filters to view all {total_tests} test(s).", size=12, color=gui._themed_color('on_surface', 'grey'))
                 ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
                 padding=ft.padding.all(20),
                 alignment=ft.alignment.center
@@ -522,18 +522,18 @@ class SearchResultsBuilder:
         )
         return ft.Container(
             content=ft.Row([
-                ft.Icon(ft.Icons.LIST_ALT, color="blue"),
+                ft.Icon(ft.Icons.LIST_ALT, color=gui._themed_color('primary', 'blue')),
                 ft.Text(f"Found {total_tests} test(s){filter_note}", size=16, weight=ft.FontWeight.W_500),
-                ft.Text(sap_note, size=12, color="grey"),
+                ft.Text(sap_note, size=12, color=gui._themed_color('on_surface', 'grey')),
                 ft.Container(expand=True),
                 ft.Text(
                     f"Selected: {selected_count}",
                     size=12,
-                    color="green" if selected_count > 0 else "grey"
+                    color=(gui._themed_color('primary', 'green') if selected_count > 0 else gui._themed_color('on_surface', 'grey'))
                 )
             ], spacing=10),
             padding=ft.padding.symmetric(vertical=6, horizontal=10),
-            bgcolor="#eef5ff",
+            bgcolor=gui._themed_color('surface', '#eef5ff'),
             border_radius=6,
             margin=ft.margin.only(bottom=8)
         )
@@ -542,21 +542,21 @@ class SearchResultsBuilder:
         return ft.Container(
             content=ft.Row([
                 ft.Container(width=40),
-                ft.Container(ft.Text("Test Lab", size=11, weight=ft.FontWeight.W_500, color="darkblue"), width=110),
-                ft.Container(ft.Text("Date", size=11, weight=ft.FontWeight.W_500, color="darkblue"), width=130),
-                ft.Container(ft.Text("Voltage", size=11, weight=ft.FontWeight.W_500, color="darkblue"), width=90),
-                ft.Container(ft.Text("Notes", size=11, weight=ft.FontWeight.W_500, color="darkblue"), expand=True),
+                ft.Container(ft.Text("Test Lab", size=11, weight=ft.FontWeight.W_500, color=ft.Colors.BLUE_900), width=110),
+                ft.Container(ft.Text("Date", size=11, weight=ft.FontWeight.W_500, color=ft.Colors.BLUE_900), width=130),
+                ft.Container(ft.Text("Voltage", size=11, weight=ft.FontWeight.W_500, color=ft.Colors.BLUE_900), width=90),
+                ft.Container(ft.Text("Notes", size=11, weight=ft.FontWeight.W_500, color=ft.Colors.BLUE_900), expand=True),
                 ft.Container(width=40)
             ]),
-            bgcolor="#f5f9ff",
+            bgcolor=self.gui._themed_color('surface', '#f5f9ff'),
             padding=ft.padding.symmetric(horizontal=12, vertical=6),
             border_radius=6,
             margin=ft.margin.only(bottom=4),
-            border=ft.border.all(1, "#d0d7e5")
+            border=ft.border.all(1, self.gui._themed_color('outline', '#d0d7e5'))
         )
 
     def _build_test_row(self, test, index: int) -> ft.Control:
-        bg_color = "#ffffff" if index % 2 == 0 else "#f8f8f8"
+        bg_color = self.gui._themed_color('surface', '#ffffff') if index % 2 == 0 else self.gui._themed_color('surface_variant', '#f8f8f8')
         selected_tests = getattr(self.gui.state_manager.state, 'selected_tests', {})
         is_selected = test.test_lab_number in selected_tests
 
@@ -594,7 +594,7 @@ class SearchResultsBuilder:
             ], alignment=ft.MainAxisAlignment.START),
             padding=ft.padding.symmetric(horizontal=12, vertical=6),
             bgcolor=bg_color,
-            border=ft.border.all(1, "#e0e0e0" if not is_selected else "green"),
+            border=ft.border.all(1, (self.gui._themed_color('outline', '#e0e0e0') if not is_selected else self.gui._themed_color('primary', 'green'))),
             border_radius=6,
             margin=ft.margin.only(bottom=4),
             on_click=row_click_handler if row_click_handler else None
