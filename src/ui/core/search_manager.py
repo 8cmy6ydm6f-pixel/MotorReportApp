@@ -513,7 +513,8 @@ class SearchResultsBuilder:
         sap_visible: int,
         filters_active: bool
     ) -> ft.Control:
-        selected_count = len(getattr(self.gui.state_manager.state, 'selected_tests', {}))
+        gui = self.gui
+        selected_count = len(getattr(gui.state_manager.state, 'selected_tests', {}))
         filter_note = "" if total_tests == visible_tests else f" | Showing {visible_tests} after filters"
         sap_note = (
             f"Viewing SAP {current_sap} ({sap_visible} of {sap_total} test(s))"
